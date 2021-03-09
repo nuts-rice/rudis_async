@@ -8,8 +8,8 @@ use tokio::net::TcpListener;
 use tokio::net::TcpStream;
 use tokio::prelude::*;
 //Tokio-codec allows to convert a stream of bytes from the network into a given type, into a parsed messaged termed as Frame
-use tokio_codec::Decoder;
 use std::env;
+use tokio_codec::Decoder;
 
 mod commands;
 use crate::commands::process_client_request;
@@ -20,13 +20,11 @@ lazy_static! {
     static_ref RUDIS_DB: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
-
-
 fn main() -> Result<(), Box<std::error::Error>> {
     let addr = env::args()
-	.skip(1)
-	.next()
-	.unwrap_or("127.0.0.1:6378".to_owned());
+        .skip(1)
+        .next()
+        .unwrap_or("127.0.0.1:6378".to_owned());
     let addr = addr.parse::<SocketAddr>()?;
 
     let listener = TcpListener::bind(&addr)?;
@@ -34,9 +32,9 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
     //Incoming() method on listener, returns an iterator of new client connections
     let server_future = listener
-	.incoming()
-	.map_err(|e| println!("Failed to accept socker; error = {:?}", e))
-	.for_each(handle_flient);
+        .incoming()
+        .map_err(|e| println!("Failed to accept socker; error = {:?}", e))
+        .for_each(handle_flient);
 
     //Creates a main tokio task and schedules future for execution
     tokio::run(server_future);
@@ -50,10 +48,10 @@ fn handle_client(client: TcpStream) -> Result<(), ()> {
     //Passing process client response, which will resolve future to a decoded frame
     let reply = rx.and_then(process_client_request);
     let task = tx.send_all(reply).then(|res| {
-	if let Err(e) = res {
-	    eprintln!("Failed to process connection; error = {:?}", e);
-	}
-	Ok(())
+        if let Err(e) = res {
+            eprintln!("Failed to process connection; error = {:?}", e);
+        }
+        Ok(())
     });
     tokio::spawn(task);
     Ok(())
